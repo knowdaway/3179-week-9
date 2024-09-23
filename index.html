@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.1.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.17.0"></script>
+    <script src="vega_lite_vis.js"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="vis"></div>
+    <script>
+      var spec = {
+        $schema: "https://vega.github.io/schema/vega-lite/v5.json",
+        width: 1200,
+        height: 800,
+        title: "Approximate distribution of rainfall in mid-2024 in each region of Australia.",
+        layer: [
+          {
+            data: {
+              url: "./map.json",
+              format: {
+                type: "topojson",
+                feature: "collection",
+              },
+            },
+
+            transform: [
+              {
+                lookup: "properties.STATE_NAME",
+                from: {
+                  data: {
+                    url: "./water-resources.json",
+                  },
+                  key: "state",
+                  fields: ["rainfall_mm"],
+                },
+              },
+            ],
+            projection: { type: "equirectangular" },
+            mark: "geoshape",
+            encoding: {
+              color: {
+                field: "rainfall_mm",
+                title: "rainfall(mm)",
+                type: "quantitative",
+                scale: {
+                  scheme: "blues",
+                },
+              },
+              tooltip: [
+              {
+                field: "properties.STATE_NAME",
+                type: "nominal",
+                title: "State",
+              },
+              {
+                field: "rainfall_mm",
+                type: "quantitative",
+                title: "rainfall(mm)",
+              },
+            ],
+            },
+          },
+          {
+            data: {
+              graticule: true,
+            },
+            mark: {
+              type: "geoshape",
+              stroke: "black",
+              strokeWidth: 0.5,
+            },
+            projection: {
+              type: "mercator",
+              scale: 700,
+              center: [133, -27],
+            },
+          },
+        ],
+        config: {
+          background: "#edfffe",
+          axis: {
+            grid: true,
+            gridColor: "lightgrey",
+            gridOpacity: 1,
+          },
+        },
+      };
+      vegaEmbed("#vis", spec).catch(console.error);
+    </script>
+  </body>
+</html>
